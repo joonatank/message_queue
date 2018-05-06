@@ -21,12 +21,12 @@ Anybody who missed an update for any reason would get a list of deltas and apply
 * Needlessly complex for background threads like file loading: a single callback function is much simpler.
 * Not the best solution for data parallel problems e.g. prime calculation, linear algebra, data analytics, image processing.
 
-For data parallel problems it's more efficient to use shared memory that is sliced for each thread. You need to be careful that you don't access somebody elses slice or that the slices are read-only and you still need barriers when the next function requires the previous data, but it avoids a major problem with message queues which is the copying of data and unnecessary allocations.
+For data parallel problems it's more efficient to use shared memory that is sliced for each thread. You need to be careful that you don't access somebody elses slice or that the slices are read-only. You still need barriers when the next function requires the previous data, but it avoids a major problem with message queues which is the copying of data and unnecessary allocations.
 
 ## How it works
-We use Linked list to implement the fifo so only two elements are ever accessed by one operation.
-* thread 1 reads from fifo
-* thread 2 writes to fifo
+We use Linked list to implement the FIFO so only two elements are ever accessed by one operation.
+* thread 1 reads from FIFO
+* thread 2 writes to FIFO
 
 Since writes access only the back of the buffer and reads only the front they never collide.
 
@@ -34,17 +34,25 @@ We need to use one atomic variable for the pointer that is used for reading to h
 
 We use two fifos for every thread one the worker can read and the other it can write.
 
+### Picture of the FIFOs
+![alt text](worker_fifos.svg "FIFOs for four worker threads.")
+
+
 More info: [Dr. Dobbs article on lock-free Message Queues](http://www.drdobbs.com/parallel/writing-lock-free-code-a-corrected-queue/210604448#)
 
 ## Sample
 The sample has a few simple message types used to calculate prime numbers in separate threads.
 
-The main thread initialises data and sends it over to workers as batches of 1024 elements the workers tests for a prime number for all those elements and send back the numbers that were primes.
+1. The main thread initialises data.
+2. Sends it over to workers as batches of 1024 elements.
+3. The workers tests for a prime number for all those elements.
+4. Optional: We introduce a delay in each calculation (to simulate a more complex function)
+5. Send back the numbers that were primes.
 
 The sample code doesn't model the use case very well since it's a data parallel problem.
 Making a proper use case requires adding more complexity: state initialisation, complex functions or a lot of different functions that can be executed on a separate thread.
 
-To illustrate performance gains (even in data parallel applications) I added a delay parameter that simulates a more complex function call you could use instead of a prime.
+To illustrate performance gains (even in data parallel applications) I added a delay parameter that simulates a more complex function call used instead of a prime checking.
 
 Performance gains:
 * Negative without a delay (as expected since prime checking is fast, we'd need to use huge data buffers)
@@ -77,11 +85,17 @@ Doesn't require any external libraries just standard library and Win32 (System l
 To compille: either open in Visual Studio (CMake plugin) or run CMake in the source tree
 
 ## Running
-primes_reference - single threaded version
+#### primes_reference - single threaded version
 
-creates output file: output_single_t.txt
+creates an output file: output_single_t.txt
 
-primes_threaded - multi-threaded version
+#### primes_threaded - multi-threaded version
 
-creates output file: output_multi_t.txt
+creates an output file: output_multi_t.txt
 
+#### Parameters
+To change the parameters for the program modify: defines.hpp and recompile.
+* N_THREADS - How many threads
+* BATCH_SIZE - How many numbers per one message
+* N_RUNS - How many batches (messages) we send total
+* DELAY - Artificial slow in the function call in milliseconds
