@@ -12,18 +12,6 @@ project( "MessagePassing" CXX )
 
 cmake_minimum_required(VERSION 2.6)
 
-set(HEADERS
-    sleep.hpp
-    time.hpp
-    chrono.hpp 
-    )
-
-set(SRC
-    time.cpp
-	chrono.cpp
-	primes_threaded.cpp
-    )
-
 if(WIN32)
 	message(STATUS "Using multiple cores for building")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
@@ -33,9 +21,13 @@ add_executable(test_fifo
 	test_fifo.cpp)
 
 add_executable(primes_threaded
-	${SRC}
-	${HEADERS}
-	${BASE_SRC}
+    time.cpp
+	chrono.cpp
+	primes_threaded.cpp
     )
 
-target_link_libraries(message_passing ${DEP_LIBS})
+add_executable(primes_reference
+	primes_reference.cpp
+	chrono.cpp
+	time.cpp
+	)
