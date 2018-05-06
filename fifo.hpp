@@ -19,7 +19,7 @@
  *
  *	Non locking is implemented by having one thread read from one end and other one push to the other
  *	we use a pointer between these two to mark the read point.
- *	The read pointer is atomic since it might be accessed from both threads.
+ *	The read pointer is atomic since it is accessed by both push and pop.
 */
 template<typename T>
 class fifo
@@ -53,10 +53,10 @@ public:
     /// Destructor
 	~fifo()
 	{
-		while(front.load() != nullptr)
+		while(front != nullptr)
 		{
-			node *tmp = front.load();
-			front.store(tmp->next);
+			node *tmp = front;
+			front = tmp->next;
 			delete tmp;
 		}
 	}
@@ -66,7 +66,7 @@ public:
     /// @throws never
 	void push(T data)
 	{
-		assert(front.load() != nullptr);
+		assert(front != nullptr);
 		assert(divider.load() != nullptr);
 		assert(back != nullptr);
 
@@ -75,17 +75,17 @@ public:
 		
 		// lazy delete, we don't modify divider here
 		// and pop doesn't modify front so we are all good
-		while (front.load() != divider.load())
+		while (front != divider.load())
 		{
-			node *tmp = front.load();
-			front.store(tmp->next);
+			node *tmp = front;
+			front = tmp->next;
 			delete tmp;
 		}
 	}
 
     /// @brief pop data from front
     /// @return the popped element
-    /// @throws on empty buffer
+    /// @throws on an empty buffer
 	T pop()
 	{
 		if(empty())
@@ -93,7 +93,8 @@ public:
 			throw std::string("empty");
 		}
 		
-		// We can't delete here, so we just move the divider
+		// We can't delete here (it's the responsibility of the pusher)
+        // so we just move the divider
 		node *tmp = divider.load()->next;
 		assert(tmp != nullptr);
 		divider.store(tmp);
@@ -109,9 +110,9 @@ public:
 	}
 
 private:
+    // divider is accessed by both push and pop so it needs to be thread-safe
 	std::atomic< node *> divider;
-    // @todo front doesn't need to be atomic
-	std::atomic< node *> front;
+	node * front;
 	node * back;
 };
 

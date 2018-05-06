@@ -30,7 +30,7 @@ We use Linked list to implement the fifo so only two elements are ever accessed 
 
 Since writes access only the back of the buffer and reads only the front they never collide.
 
-We need to use one atomic variable for the pointer that is used for reading to handle cases where the buffer is empty. Atomic variables aren't locked but retrieval/assigment is quarantied to be a single thread safe operation.
+We need to use one atomic variable for the pointer that is used for reading to handle cases where the buffer is empty. Atomic variables aren't locked but retrieval/assigment is guaranteed to be a single thread safe operation.
 
 We use two fifos for every thread one the worker can read and the other it can write.
 

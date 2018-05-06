@@ -14,7 +14,7 @@
 /// @brief test if a number is a prime or not
 /// @param n number to test
 /// @return true if prime, false otherwise
-bool isPrime(int n)
+bool isPrime(size_t n)
 {
     if (n <= 1)
     { return false; }
