@@ -1,9 +1,9 @@
 /**
-*	@author Joonatan Kuosa <joonatan.kuosa@gmail.com>
-*	@date 2018-05
-*	@file main.cpp
+*   @author Joonatan Kuosa <joonatan.kuosa@gmail.com>
+*   @date 2018-05
+*   @file main.cpp
 *
-*	Under a copyleft.
+*   Under a copyleft.
 */
 
 #include <iostream>
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
     }
 
     ss.str("");
-    ss << "ALL DONE " << std::endl 
+    ss << "ALL DONE " << std::endl
         << "Found " << count << " primes." << std::endl
         << "Total time: " << app_clock.elapsed();
     std::cout << ss.str() << std::endl;

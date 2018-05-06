@@ -1,9 +1,9 @@
 /**
-*	@author Joonatan Kuosa <joonatan.kuosa@gmail.com>
-*	@date 2018-05
-*	@file fifo.hpp
+*   @author Joonatan Kuosa <joonatan.kuosa@gmail.com>
+*   @date 2018-05
+*   @file fifo.hpp
 *
-*	Under a copyleft.
+*   Under a copyleft.
 */
 
 #ifndef PRIME_HPP

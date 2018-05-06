@@ -1,28 +1,28 @@
 /**
- *	Copyright (c) 2011 Tampere University of Technology
- *	Copyright (c) 2011 - 2014 Savant Simulators
+ *  Copyright (c) 2011 Tampere University of Technology
+ *  Copyright (c) 2011 - 2014 Savant Simulators
  *
- *	@author Joonatan Kuosa <joonatan.kuosa@savantsimulators.com>
- *	@date 2011-03
- *	@file base/time.hpp
+ *  @author Joonatan Kuosa <joonatan.kuosa@savantsimulators.com>
+ *  @date 2011-03
+ *  @file base/time.hpp
  *
- *	This file is part of Hydra VR game engine.
- *	Version 0.5
+ *  This file is part of Hydra VR game engine.
+ *  Version 0.5
  *
- *	Licensed under commercial license.
+ *  Licensed under commercial license.
  *
  */
 
 /**
- *	Linux and Windows implementation is provided.
+ *  Linux and Windows implementation is provided.
  *
- *	Time functions and timers provide microsecond resolution on most current machines
- *	this can be checked using get_system_time_accuracy function.
+ *  Time functions and timers provide microsecond resolution on most current machines
+ *  this can be checked using get_system_time_accuracy function.
  *
- *	time class is provided for ease of usage, this follows the same design as
- *	BSD timeval/timespec, but provides operators in c++ fashion.
+ *  time class is provided for ease of usage, this follows the same design as
+ *  BSD timeval/timespec, but provides operators in c++ fashion.
  *
- *	portable system functions for performance timing are provided
+ *  portable system functions for performance timing are provided
  *
  */
 
@@ -41,119 +41,119 @@ namespace vl
 /// Timeval structure with functionality
 struct time
 {
-	time(uint32_t s = 0, uint32_t us = 0);
-	
-	// @brief constructor
-	// @param s seconds
-	// int constructor defined because there is no implicit conversion 
-	// from uint to int
-	// does not do any checking that the value passed is valid (non negative)
-	time(int s);
+    time(uint32_t s = 0, uint32_t us = 0);
 
-	time(double s);
+    // @brief constructor
+    // @param s seconds
+    // int constructor defined because there is no implicit conversion
+    // from uint to int
+    // does not do any checking that the value passed is valid (non negative)
+    time(int s);
 
-	uint32_t sec;
-	uint32_t usec;
+    time(double s);
 
-	/// conversion to seconds
-	operator double() const;
+    uint32_t sec;
+    uint32_t usec;
 
-	/// Arithmetic
-	time &operator-=(time const &t);
+    /// conversion to seconds
+    operator double() const;
 
-	time &operator+=(time const &t);
+    /// Arithmetic
+    time &operator-=(time const &t);
 
-	time &operator/=(double n);
+    time &operator+=(time const &t);
 
-	time &operator*=(double n);
+    time &operator/=(double n);
 
-	time &operator/=(size_t n);
+    time &operator*=(double n);
 
-	time &operator*=(size_t n);
+    time &operator/=(size_t n);
 
-	// Overload int versions to convert to uint
-	// no release version checking that the number is valid (non negative and not zero)
-	time &operator/=(int n);
+    time &operator*=(size_t n);
 
-	time &operator*=(int n);
+    // Overload int versions to convert to uint
+    // no release version checking that the number is valid (non negative and not zero)
+    time &operator/=(int n);
+
+    time &operator*=(int n);
 
 private :
-	void _check_usecs(void);
+    void _check_usecs(void);
 };
 
 /// time arithmetic operators
 inline
 time operator+(time const &t1, time const &t2)
 {
-	time tmp(t1);
-	tmp += t2;
-	return tmp;
+    time tmp(t1);
+    tmp += t2;
+    return tmp;
 }
 
 inline
 time operator-(time const &t1, time const &t2)
 {
-	time tmp(t1);
-	tmp -= t2;
-	return tmp;
+    time tmp(t1);
+    tmp -= t2;
+    return tmp;
 }
 
 template<typename T>
 inline
 time operator*(time const &t1, T n)
 {
-	time tmp(t1);
-	tmp *= n;
-	return tmp;
+    time tmp(t1);
+    tmp *= n;
+    return tmp;
 }
 
 template<typename T>
 inline
 time operator/(time const &t1, T n)
 {
-	time tmp(t1);
-	tmp /= n;
-	return tmp;
+    time tmp(t1);
+    tmp /= n;
+    return tmp;
 }
 
 /// time comparison operators
 inline
 bool operator==(time const &t1, time const &t2)
 {
-	return t1.sec == t2.sec && t1.usec == t2.usec;
+    return t1.sec == t2.sec && t1.usec == t2.usec;
 }
 
 inline
 bool operator!=(time const &t1, time const &t2)
 {
-	return !(t1 == t2);
+    return !(t1 == t2);
 }
 
 inline
 bool operator<(time const &t1, time const &t2)
 {
-	if( t1.sec == t2.sec )
-	{ return t1.usec < t2.usec; }
-	else
-	{ return t1.sec < t2.sec; }
+    if( t1.sec == t2.sec )
+    { return t1.usec < t2.usec; }
+    else
+    { return t1.sec < t2.sec; }
 }
 
 inline
 bool operator>(time const &t1, time const &t2)
 {
-	return t2 < t1;
+    return t2 < t1;
 }
 
 inline
 bool operator<=(time const &t1, time const &t2)
 {
-	return t1 < t2 || t1 == t2;
+    return t1 < t2 || t1 == t2;
 }
 
 inline
 bool operator>=(time const &t1, time const &t2)
 {
-	return t1 > t2 || t1 == t2;
+    return t1 > t2 || t1 == t2;
 }
 
 
@@ -168,6 +168,6 @@ double get_system_time_accuracy(void);
 /// on current machines.
 time get_system_time(void);
 
-}	// namespace vl
+}   // namespace vl
 
 #endif // HYDRA_TIME_HPP

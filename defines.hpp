@@ -1,9 +1,9 @@
 /**
-*	@author Joonatan Kuosa <joonatan.kuosa@gmail.com>
-*	@date 2018-05
-*	@file defines.hpp
+*   @author Joonatan Kuosa <joonatan.kuosa@gmail.com>
+*   @date 2018-05
+*   @file defines.hpp
 *
-*	Under a copyleft.
+*   Under a copyleft.
 */
 
 #ifndef DEFINES_HPP
