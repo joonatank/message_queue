@@ -34,6 +34,8 @@ We need to use one atomic variable for the pointer that is used for reading to h
 
 We use two fifos for every thread one the worker can read and the other it can write.
 
+More info: [Dr. Dobbs article on lock-free Message Queues](http://www.drdobbs.com/parallel/writing-lock-free-code-a-corrected-queue/210604448#)
+
 ## Sample
 The sample has a few simple message types used to calculate prime numbers in separate threads.
 
