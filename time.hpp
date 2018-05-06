@@ -9,7 +9,7 @@
  *  This file is part of Hydra VR game engine.
  *  Version 0.5
  *
- *  Licensed under commercial license.
+ *  MIT license (like the orginal TUT version)
  *
  */
 
