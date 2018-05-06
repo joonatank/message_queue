@@ -55,6 +55,7 @@ Performance gains:
 
 * prime.hpp - contains the functions used by both
 * fifo.hpp - contains the thread safe message queue
+* defines.hpp - contains parameters for the program (how many threads, batch size etc.)
 
 * test_fifo.cpp - contains unit tests for fifo
 

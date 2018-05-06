@@ -28,6 +28,9 @@ const uint16_t MSG_EXIT = 3;
 // @todo for large batches we need to switch to dynamic memory
 struct Message
 {
+    Message(uint16_t type) : msg(type), size(0) {}
+    Message() : msg(MSG_UNDEFINED), size(0) {}
+
 	uint16_t msg;
 	size_t data[BATCH_SIZE];
     size_t size;
@@ -49,9 +52,7 @@ void primes(buffer_t *in, buffer_t *out)
             {
             case MSG_BATCH:
             {
-                Message msg;
-                msg.msg = MSG_RESULTS;
-                msg.size = 0;
+                Message msg(MSG_RESULTS);
                 for(size_t i = 0; i < data.size; ++i)
                 {
                     really_slow_func(DELAY);
@@ -78,6 +79,27 @@ void primes(buffer_t *in, buffer_t *out)
 	}
 }
 
+/// @brief read data from threads and print it to standard out
+/// @param in buffers for all threads (an array)
+/// @param n_threads how many threads
+/// @param n_rec OUT how many responses have we got
+/// @param c_primes OUT how many primes we found so far
+void read_from_threads(buffer_t *in, const size_t n_threads, size_t &n_rec, size_t &c_primes)
+{
+    for (size_t i = 0; i < n_threads; ++i)
+    {
+        while (!in[i].empty())
+        {
+            ++n_rec;
+            auto data = in[i].pop();
+            for(size_t j = 0; j < data.size; ++j)
+            {
+                std::cout << data.data[j] << " is a prime (thread: " << i << ")" << std::endl;
+                ++c_primes;
+            }
+        }
+    }
+}
 
 
 int main(int argc, char *argv[])
@@ -127,10 +149,8 @@ int main(int argc, char *argv[])
 		for (size_t i = 0; i < N_THREADS; ++i)
 		{
             ++n_sent;
-            Message msg;
-            msg.msg = MSG_BATCH;
+            Message msg(MSG_BATCH);
             msg.size = BATCH_SIZE;
-			//std::cout << "thread: " << i << " start data: " << count << std::endl;
 			for (size_t j = 0; j < BATCH_SIZE; ++j)
 			{
 				// push to the thread
@@ -141,46 +161,27 @@ int main(int argc, char *argv[])
 		}
 		std::cout << run << " : Took " << clock.elapsed() << " to push data." << std::endl;
 
+        // sleep to force a context switch (so our workers get going)
 		vl::sleep(1);
 
 		std::cout << "Pull data" << std::endl;
 		clock.reset();
-		// read the results and print them to standard stream
-		for (size_t i = 0; i < N_THREADS; ++i)
-		{
-			while (!in[i].empty())
-			{
-                ++n_rec;
-				auto data = in[i].pop();
-                for(size_t j = 0; j < data.size; ++j)
-                {
-				    std::cout << data.data[j] << " is a prime (thread: " << i << ")" << std::endl;
-                    ++c_primes;
-                }
-			}
-		}
+		
+        read_from_threads(in, N_THREADS, n_rec, c_primes);
+
 		std::cout << run << " : Took " << clock.elapsed() << " to get data." << std::endl;
 	}
 
+    clock.reset();
     // Wait for data
     // @todo this is a duplicate (from above), change to a function
     while(n_sent != n_rec)
     {
-        for (size_t i = 0; i < N_THREADS; ++i)
-        {
-            while (!in[i].empty())
-            {
-                ++n_rec;
-                auto data = in[i].pop();
-                for(size_t j = 0; j < data.size; ++j)
-                {
-                    std::cout << data.data[j] << " is a prime (thread: " << i << ")" << std::endl;
-                    ++c_primes;
-                }
-            }
-        }
+        read_from_threads(in, N_THREADS, n_rec, c_primes);
+
         vl::sleep(1);
     }
+    std::cout << "Took " << clock.elapsed() << " to wait for all the data." << std::endl;
 	
     // Final reports to console and file
     ss.str("");
@@ -194,8 +195,7 @@ int main(int argc, char *argv[])
     // Cleanup
 	for (size_t i = 0; i < N_THREADS; ++i)
 	{
-        Message msg;
-        msg.msg = MSG_EXIT;
+        Message msg(MSG_EXIT);
         out[i].push(msg);
     }
 
