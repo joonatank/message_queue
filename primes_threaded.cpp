@@ -6,6 +6,12 @@
 *   Under a copyleft.
 */
 
+// @todo Change so that NUMBER of THREADS doesn't affect number of primes checked
+// instead make them distinct and divide the numbers by threads
+// it's hella confusing atm
+// @todo using std::cout for might not be that good since it's thread safe
+// we only call it from the main thread but still we could just use unsafe filestream.
+
 #include "sleep.hpp"
 #include "chrono.hpp"
 
@@ -130,13 +136,13 @@ int main(int argc, char *argv[])
     std::cout.rdbuf(fout.rdbuf());
 
     /// Total number of primes to calculate
-    const size_t N_PRIMES = n_threads * BATCH_SIZE * N_RUNS;
+    const size_t N_NUMBERS  = n_threads * BATCH_SIZE * N_RUNS;
 
     // print out the starting parameters
     std::stringstream ss;
     ss << "Starting with " << n_threads << " threads : " << BATCH_SIZE << " per batch : "
         << N_RUNS << " batches." << std::endl
-        << " Checking " << N_PRIMES << " numbers for prime number." << std::endl
+        << " Checking " << N_NUMBERS << " numbers for prime number." << std::endl
         << " With a delay of " << delay << "ms per function call.";
     std::cout << ss.str() << std::endl;
     std::clog << ss.str() << std::endl;
@@ -202,16 +208,7 @@ int main(int argc, char *argv[])
         vl::sleep(1);
     }
     std::cout << "Took " << clock.elapsed() << " to wait for all the data." << std::endl;
-
-    // Final reports to console and file
-    ss.str("");
-    ss << "ALL DONE" << std::endl
-        << " found " << c_primes << " prime numbers."
-        << " from " << N_RUNS * BATCH_SIZE << std::endl
-        << "Total time: " << app_timer.elapsed();
-    std::cout << ss.str() << std::endl;
-    std::clog << ss.str() << std::endl;
-
+ 
     // Cleanup
     for (size_t i = 0; i < n_threads; ++i)
     {
@@ -223,6 +220,16 @@ int main(int argc, char *argv[])
     {
         workers.at(i).join();
     }
+
+    // Final reports to console and file
+    ss.str("");
+    ss << "ALL DONE" << std::endl
+        << " found " << c_primes << " prime numbers."
+        << " from " << N_NUMBERS << std::endl
+        << "Total time: " << app_timer.elapsed();
+    std::cout << ss.str() << std::endl;
+    std::clog << ss.str() << std::endl;
+
 
     return 0;
 }

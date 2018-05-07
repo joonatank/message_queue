@@ -111,3 +111,6 @@ The default parameter values are in defines.hpp:
 * BATCH_SIZE - How many numbers per one message
 * N_RUNS - How many batches (messages) we send total
 * DELAY - Artificial slow in the function call in milliseconds
+
+### TODO
+Run a proper tests with 2, 4, 8, 16, 32 threads and document. Seems like same execution time with all of those even though the data amount is doubled and it introduces a lot of context switching. Why?

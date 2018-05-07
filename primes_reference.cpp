@@ -44,11 +44,11 @@ int main(int argc, char **argv)
     std::cout.rdbuf(fout.rdbuf());
 
     /// Total number of primes to calculate
-    const size_t N_PRIMES = n_threads * BATCH_SIZE * N_RUNS;
+    const size_t N_NUMBERS = n_threads * BATCH_SIZE * N_RUNS;
 
     std::stringstream ss;
     ss << "Startin non-threaded version: with" << std::endl
-        << " " << N_PRIMES << " numbers to check for primes." << std::endl
+        << " " << N_NUMBERS << " numbers to check for primes." << std::endl
         << " With a delay of " << delay << "ms per function call.";
     // Print to the user
     std::clog << ss.str() << std::endl;
@@ -68,7 +68,7 @@ int main(int argc, char **argv)
 
     ss.str("");
     ss << "ALL DONE " << std::endl
-        << "Found " << count << " primes." << std::endl
+        << "Found " << count << " primes from " << N_NUMBERS << " numbers." << std::endl
         << "Total time: " << app_clock.elapsed();
     std::cout << ss.str() << std::endl;
     std::clog << ss.str() << std::endl;
