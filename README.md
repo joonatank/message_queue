@@ -85,16 +85,28 @@ Doesn't require any external libraries just standard library and Win32 (System l
 To compille: either open in Visual Studio (CMake plugin) or run CMake in the source tree
 
 ## Running
-#### primes_reference - single threaded version
+Prameters:
+* {N_THREADS} - Number of threads (for single threaded changes the number of primes to calculate)
+* {DELAY} - Artificial delay in function calls (milliseconds)
+* {OUTPUT_FILENAME} - log file name
 
-creates an output file: output_single_t.txt
+#### primes_reference - single threaded version
+primes_reference.exe {N_THREADS} {DELAY} {OUTPUT_FILENAME}
+
+example (default arguments):
+
+primes_reference.exe 2 1 output_single_t.txt
+
 
 #### primes_threaded - multi-threaded version
+primes_reference.exe {N_THREADS} {DELAY} {OUTPUT_FILENAME}
 
-creates an output file: output_multi_t.txt
+example (default arguments):
 
-#### Parameters
-To change the parameters for the program modify: defines.hpp and recompile.
+primes_threaded.exe 2 1 output_multi_t.txt
+
+#### Default Parameters
+The default parameter values are in defines.hpp:
 * N_THREADS - How many threads
 * BATCH_SIZE - How many numbers per one message
 * N_RUNS - How many batches (messages) we send total

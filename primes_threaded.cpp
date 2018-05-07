@@ -39,7 +39,7 @@ struct Message
 #define buffer_t fifo<Message>
 
 // worker function
-void primes(buffer_t *in, buffer_t *out)
+void primes(buffer_t *in, buffer_t *out, size_t delay)
 {
     bool cont = true;
     while (cont)
@@ -54,7 +54,7 @@ void primes(buffer_t *in, buffer_t *out)
                 Message msg(MSG_RESULTS);
                 for(size_t i = 0; i < data.size; ++i)
                 {
-                    really_slow_func(DELAY);
+                    really_slow_func(delay);
                     auto n = data.data[i];
                     if(isPrime(n))
                     {
@@ -100,37 +100,59 @@ void read_from_threads(buffer_t *in, const size_t n_threads, size_t &n_rec, size
     }
 }
 
-
+/// Params {EXE} {N_THREADS} {DELAY} {OUTPUT_FILENAME}
+/// N_threads how many workers do we create
+/// Delay in milliseconds (extra time function call takes)
 int main(int argc, char *argv[])
 {
+    // Input params
+    int n_threads = N_THREADS;
+    int delay = DELAY;
+    std::string out_filename = "output_multi_t.txt";
+
+    if(argc > 1)
+    {
+        n_threads = std::atoi(argv[1]);
+    }
+    if(argc > 2)
+    {
+        delay = std::atoi(argv[2]);
+    }
+    if(argc > 3)
+    {
+        out_filename = argv[3];
+    }
 
     // Redirect cout
     // simpler to print into it, but console is slow as sin
     std::streambuf* oldCoutStreamBuf = std::cout.rdbuf();
-    std::ofstream fout("output_multi_t.txt");
+    std::ofstream fout(out_filename);
     std::cout.rdbuf(fout.rdbuf());
+
+    /// Total number of primes to calculate
+    const size_t N_PRIMES = n_threads * BATCH_SIZE * N_RUNS;
 
     // print out the starting parameters
     std::stringstream ss;
-    ss << "Starting with " << N_THREADS << " threads : " << BATCH_SIZE << " per batch : "
+    ss << "Starting with " << n_threads << " threads : " << BATCH_SIZE << " per batch : "
         << N_RUNS << " batches." << std::endl
         << " Checking " << N_PRIMES << " numbers for prime number." << std::endl
-        << " With a delay of " << DELAY << "ms per function call.";
+        << " With a delay of " << delay << "ms per function call.";
     std::cout << ss.str() << std::endl;
     std::clog << ss.str() << std::endl;
 
     // full application clock
     vl::chrono app_timer;
 
-    buffer_t out[N_THREADS];
-    buffer_t in[N_THREADS];
+    std::vector<buffer_t> out(n_threads);
+    std::vector<buffer_t> in(n_threads);
     std::vector<std::thread> workers;
 
     auto clock = vl::chrono();
     // spawn threads
-    for (size_t i = 0; i < N_THREADS; ++i)
+    for (size_t i = 0; i < n_threads; ++i)
     {
-        workers.push_back(std::thread(primes, &out[i], &in[i]));
+        workers.push_back(std::thread(primes, &out[i], &in[i], delay));
     }
 
     std::cout << "Took " << clock.elapsed() << " to create workers." << std::endl;
@@ -145,7 +167,7 @@ int main(int argc, char *argv[])
     {
         std::cout << "Push Data" << std::endl;
         clock.reset();
-        for (size_t i = 0; i < N_THREADS; ++i)
+        for (size_t i = 0; i < n_threads; ++i)
         {
             ++n_sent;
             Message msg(MSG_BATCH);
@@ -166,7 +188,7 @@ int main(int argc, char *argv[])
         std::cout << "Pull data" << std::endl;
         clock.reset();
 
-        read_from_threads(in, N_THREADS, n_rec, c_primes);
+        read_from_threads(&in[0], n_threads, n_rec, c_primes);
 
         std::cout << run << " : Took " << clock.elapsed() << " to get data." << std::endl;
     }
@@ -175,7 +197,7 @@ int main(int argc, char *argv[])
     // Wait for data, we should have same amount of messages in each direction
     while(n_sent != n_rec)
     {
-        read_from_threads(in, N_THREADS, n_rec, c_primes);
+        read_from_threads(&in[0], n_threads, n_rec, c_primes);
 
         vl::sleep(1);
     }
@@ -191,13 +213,13 @@ int main(int argc, char *argv[])
     std::clog << ss.str() << std::endl;
 
     // Cleanup
-    for (size_t i = 0; i < N_THREADS; ++i)
+    for (size_t i = 0; i < n_threads; ++i)
     {
         Message msg(MSG_EXIT);
         out[i].push(msg);
     }
 
-    for(size_t i = 0; i < N_THREADS; ++i)
+    for(size_t i = 0; i < n_threads; ++i)
     {
         workers.at(i).join();
     }
